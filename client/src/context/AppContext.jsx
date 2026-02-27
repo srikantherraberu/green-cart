@@ -2,7 +2,10 @@ import { createContext, useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
 import toast from "react-hot-toast";
+import axios from "axios";
 
+axios.defaults.withCredentials=true;
+axios.defaults.baseURL=import.meta.env.VITE_BACKEND_URL;
 export const AppContext= createContext();
 
 export const AppContextProvider=({children})=>{
@@ -16,9 +19,33 @@ export const AppContextProvider=({children})=>{
     const [cartItems, setCartItems]=useState({})
     const [searchQuery, setSearchQuery]=useState({})
 
+
+    //fetch Seller Status
+    const fetchSeller=async()=>{
+        try {
+            const {data}= await axios.get('/api/seller/is-auth');
+            if(data.success){
+                setIsSeller(true);
+            }else{
+                setIsSeller(false);
+            }
+        } catch (error) {
+            setIsSeller(false);
+        }
+    }
+
     //fetching all products
     const fetchProducts=async()=>{
-        setProducts(dummyProducts);
+        try {
+            const {data}= await axios.get('/api/product/list');
+            if(data.success){
+                setProducts(data.products);
+            }else{
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
     }
 
     //adding itmes to cart
@@ -75,11 +102,13 @@ export const AppContextProvider=({children})=>{
 
 
     useEffect(()=>{
+        fetchSeller();
         fetchProducts();
     },[])
 
     const value={navigate,user,setUser,setIsSeller,isSeller,showUserLogin,setShowUserLogin,products,currency,
-            addToCart,updateCartItem,removeFromCart,cartItems,searchQuery,setSearchQuery,getCartCount,getCartAmount
+            addToCart,updateCartItem,removeFromCart,cartItems,searchQuery,setSearchQuery,getCartCount,getCartAmount,axios,
+            fetchProducts
     }
     
     return <AppContext.Provider value={value}>
