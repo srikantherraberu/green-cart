@@ -138,7 +138,7 @@ export const AppContextProvider=({children})=>{
 
     const value={navigate,user,setUser,setIsSeller,isSeller,showUserLogin,setShowUserLogin,products,currency,
             addToCart,updateCartItem,removeFromCart,cartItems,searchQuery,setSearchQuery,getCartCount,getCartAmount,axios,
-            fetchProducts
+            fetchProducts, setCartItems
     }
     
     return <AppContext.Provider value={value}>

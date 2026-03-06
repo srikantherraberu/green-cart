@@ -13,14 +13,17 @@ export const placeOrderCOD =async(req,res)=>{
         }
         //Calculate amount using items
         let amount= await items.reduce(async(acc,item)=>{
-            const product= await Product.findById(item.product);
+            const product= await Product.findById(item.productId);
             return (await acc)+ product.offerPrice * item.quantity;
         },0)
         //Add Tax amount (2%)
         amount+=Math.floor(amount* 0.02);
         await Order.create({
             userId,
-            items,
+            items: items.map(item => ({
+                product: item.productId,
+                quantity: item.quantity
+        })),
             amount,
             address,
             paymentType : "COD"
@@ -35,7 +38,7 @@ export const placeOrderCOD =async(req,res)=>{
 
 export const getUserOrders= async(req,res)=>{
     try {
-        const {userId}= req.body;
+        const userId= req.userId;
         const orders=await Order.find({
             userId,
             $or :[{paymentType: "COD"},{isPaid: true}]
